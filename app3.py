@@ -34,7 +34,7 @@ if uploaded_file:
     try:
         preds = clf.predict(features)
         df["Prediction"] = preds
-        label_map = {0: "Benign", 1: "Attack"}
+        label_map = {1: "Benign", 0: "Attack"}
         df["Prediction_Label"] = df["Prediction"].map(label_map)
 
         st.write("### 📈 Predictions", df[["Prediction", "Prediction_Label"]].head())
@@ -52,13 +52,20 @@ if uploaded_file:
             try:
                 
                 df["Label"] = df["Label"].astype(str).str.strip().str.upper()
-                df["True_Label"] = df["Label"].apply(lambda x: 0 if x == "BENIGN" else 1)
+                df["True_Label"] = df["Label"].apply(lambda x: 1 if x == "BENIGN" else 0)
 
 
                 st.write("### 📊 Classification Report")
                 report = classification_report(df["True_Label"], preds, output_dict=True)
                 st.dataframe(pd.DataFrame(report).transpose())
 
+                st.write("### 🧮 Confusion Matrix")
+                cm = confusion_matrix(df["True_Label"], preds)
+                fig, ax = plt.subplots()
+                sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=["Benign", "Attack"], yticklabels=["Benign", "Attack"])
+                ax.set_xlabel("Predicted")
+                ax.set_ylabel("Actual")
+                st.pyplot(fig)
                 
 
             except Exception as e:
